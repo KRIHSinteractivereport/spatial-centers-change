@@ -45,7 +45,24 @@
             color: #333;
             text-align: center;
         }
-
+        /* 현재 위치 버튼 스타일 */
+        .custom-gps-btn {
+            background-color: #fff;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 4px; /* Leaflet 기본 스타일과 맞춤 */
+        }
+        .custom-gps-btn:hover {
+            background-color: #f4f4f4;
+        }
+        .custom-gps-btn .material-icons {
+            font-size: 18px; 
+            line-height: 30px; 
+            color: #333;
+        }
         /* 지도 컨테이너 */
         #map {
             width: 80%;
@@ -948,6 +965,49 @@
         // 2) 우측 하단에 zoom control 추가
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
+    
+        // 2-1) 현재 위치 찾기 버튼 컨트롤 정의
+        var GpsControl = L.Control.extend({
+            options: {
+                position: 'bottomright' // 줌 컨트롤과 같은 위치(자동으로 위쪽에 쌓임)
+            },
+            onAdd: function (map) {
+                var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control custom-gps-btn');
+                
+                // Material Icon 추가
+                container.innerHTML = '<span class="material-icons" title="현재 위치로 이동">my_location</span>';
+                
+                // 클릭 이벤트 방지 (지도로 전파되지 않게)
+                L.DomEvent.disableClickPropagation(container);
+
+                // 클릭 시 현재 위치 찾기 실행
+                container.onclick = function(){
+                    // setView: true -> 위치 찾으면지동으로 이동
+                    // maxZoom: 10 -> 너무 확대되지 않게 적절한 줌 레벨 설정
+                    map.locate({setView: true, maxZoom: 10});
+                }
+                return container;
+            }
+        });
+
+        // 지도에 버튼 추가
+        map.addControl(new GpsControl());
+
+        // 위치 찾기 성공 시 이벤트 (선택 사항: 팝업 띄우기 등)
+        map.on('locationfound', function(e) {
+            console.log("위치 찾기 성공:", e.latlng);
+            // 필요하다면 마커를 표시할 수도 있습니다.
+            // L.marker(e.latlng).addTo(map).bindPopup("현재 위치").openPopup();
+        });
+
+        // 위치 찾기 실패 시 이벤트 (권한 거부 등)
+        map.on('locationerror', function(e) {
+            alert("현재 위치를 찾을 수 없습니다.\n브라우저의 위치 정보 권한을 확인해주세요.");
+        });
+        // ▲▲▲ [여기까지] ▲▲▲
+
+
+        
         // 3) OSM 기본 베이스 레이어
         var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors',
