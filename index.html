@@ -1090,28 +1090,7 @@
             인터랙티브 리포트로 이동
         </a>
     </div>
-
-        <!-- 3. 스크립트 (맨 아래에 두면 제일 안전) -->
-    <script>
-        const target = document.getElementById('finalCallToAction');
-
-        function checkIfBottom() {
-            const scrollPos = window.scrollY + window.innerHeight;
-            const docHeight = document.documentElement.scrollHeight;
-            if (Math.abs(scrollPos - docHeight) < 2) { // 2px 이내면 진짜 바닥
-                target.classList.add('show');
-            } else {
-                target.classList.remove('show');
-            }
-        }
-
-        window.addEventListener('scroll', checkIfBottom);
-        window.addEventListener('resize', checkIfBottom);
-
-        // 페이지 처음 로드 시에도 체크
-        checkIfBottom();
-    </script>
-
+    
     <!-- ============================
          푸터 (기관 정보 등)
        ============================ -->
@@ -1133,5 +1112,37 @@
             <p style="margin: 0;">▪︎ 작성연월: 2025년 6월</p>
         </div>
     </footer>
+
+                <!-- 3. 스크립트 (맨 아래에 두면 제일 안전) -->
+    <script>
+        /* ============================================================
+        [추천] IntersectionObserver: 푸터 감지 및 버튼 등장 스크립트
+        ============================================================ */
+
+        // 1. 감시자(Observer) 설정
+        const footerObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                const targetBtn = document.getElementById('finalCallToAction');
+                
+                // 푸터(footer)가 화면에 10% 이상 보이면?
+                if (entry.isIntersecting) {
+                    targetBtn.classList.add('show'); // 버튼 등장
+                } else {
+                    targetBtn.classList.remove('show'); // 버튼 숨김 (원치 않으면 이 줄 삭제)
+                }
+            });
+        }, {
+            threshold: 0.1 // 푸터가 10% 정도 보일 때 작동
+        });
+
+        // 2. 감시 대상 설정 (페이지 맨 아래 <footer> 태그)
+        const footerSection = document.querySelector('footer');
+
+        // 3. 감시 시작
+        if (footerSection) {
+            footerObserver.observe(footerSection);
+        }
+    </script>
+    
 </body>
 </html>
